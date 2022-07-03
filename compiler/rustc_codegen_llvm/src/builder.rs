@@ -97,7 +97,27 @@ impl<'a, 'll, CX: Borrow<SCx<'ll>>> GenericBuilder<'a, 'll, CX> {
     }
 
     pub(crate) fn bitcast(&mut self, val: &'ll Value, dest_ty: &'ll Type) -> &'ll Value {
+        // FIXME: remove before merge
+        assert!(
+            !(matches!(self.cx.type_kind(self.cx.val_ty(val)), TypeKind::Pointer)
+                || matches!(self.cx.type_kind(dest_ty), TypeKind::Pointer)),
+            "val ty is {:?}, dest_ty is {:?}",
+            self.cx.type_kind(self.cx.val_ty(val)),
+            self.cx.type_kind(dest_ty),
+        );
         unsafe { llvm::LLVMBuildBitCast(self.llbuilder, val, dest_ty, UNNAMED) }
+    }
+
+    pub(crate) fn pointercast(&mut self, val: &'ll Value, dest_ty: &'ll Type) -> &'ll Value {
+        // FIXME: remove before merge
+        assert!(
+            (matches!(self.cx.type_kind(self.cx.val_ty(val)), TypeKind::Pointer)
+                && matches!(self.cx.type_kind(dest_ty), TypeKind::Pointer)),
+            "val ty is {:?}, dest_ty is {:?}",
+            self.cx.type_kind(self.cx.val_ty(val)),
+            self.cx.type_kind(dest_ty),
+        );
+        unsafe { llvm::LLVMBuildPointerCast(self.llbuilder, val, dest_ty, UNNAMED) }
     }
 
     pub(crate) fn ret_void(&mut self) {
@@ -994,6 +1014,14 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
     }
 
     fn bitcast(&mut self, val: &'ll Value, dest_ty: &'ll Type) -> &'ll Value {
+        // FIXME: remove before merge
+        assert!(
+            !(matches!(self.cx.type_kind(self.cx.val_ty(val)), TypeKind::Pointer)
+                || matches!(self.cx.type_kind(dest_ty), TypeKind::Pointer)),
+            "val ty is {:?}, dest_ty is {:?}",
+            self.cx.type_kind(self.cx.val_ty(val)),
+            self.cx.type_kind(dest_ty),
+        );
         unsafe { llvm::LLVMBuildBitCast(self.llbuilder, val, dest_ty, UNNAMED) }
     }
 
@@ -1010,6 +1038,14 @@ impl<'a, 'll, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
     }
 
     fn pointercast(&mut self, val: &'ll Value, dest_ty: &'ll Type) -> &'ll Value {
+        // FIXME: remove before merge
+        assert!(
+            (matches!(self.cx.type_kind(self.cx.val_ty(val)), TypeKind::Pointer)
+                && matches!(self.cx.type_kind(dest_ty), TypeKind::Pointer)),
+            "val ty is {:?}, dest_ty is {:?}",
+            self.cx.type_kind(self.cx.val_ty(val)),
+            self.cx.type_kind(dest_ty),
+        );
         unsafe { llvm::LLVMBuildPointerCast(self.llbuilder, val, dest_ty, UNNAMED) }
     }
 
@@ -1572,7 +1608,11 @@ impl<'a, 'll, CX: Borrow<SCx<'ll>>> GenericBuilder<'a, 'll, CX> {
                             Expected {:?} for param {}, got {:?}; injecting bitcast",
                         llfn, expected_ty, i, actual_ty
                     );
-                    self.bitcast(actual_val, expected_ty)
+                    if let TypeKind::Pointer = self.cx.type_kind(expected_ty) {
+                        self.pointercast(actual_val, expected_ty)
+                    } else {
+                        self.bitcast(actual_val, expected_ty)
+                    }
                 } else {
                     actual_val
                 }
