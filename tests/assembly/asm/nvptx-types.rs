@@ -1,9 +1,10 @@
 // assembly-output: emit-asm
+// no-prefer-dynamic
 // compile-flags: --target nvptx64-nvidia-cuda
-// compile-flags: --crate-type cdylib
 // needs-llvm-components: nvptx
 
-#![feature(no_core, lang_items, rustc_attrs, asm_experimental_arch)]
+#![feature(no_core, lang_items, rustc_attrs, asm_sym, asm_experimental_arch)]
+#![crate_type = "cdylib"]
 #![no_core]
 
 #[rustc_builtin_macro]
@@ -30,9 +31,10 @@ impl Copy for i64 {}
 impl Copy for f64 {}
 impl Copy for ptr {}
 
-// NVPTX does not support static variables
-#[no_mangle]
-fn extern_func() {}
+extern "C" {
+    fn extern_func();
+    static extern_static: u32;
+}
 
 // CHECK-LABEL: .visible .func sym_fn()
 // CHECK: // begin inline asm

@@ -11,8 +11,8 @@ pub fn target() -> Target {
             os: "cuda".into(),
             vendor: "nvidia".into(),
             linker_flavor: LinkerFlavor::Ptx,
-            // The linker can be installed from `crates.io`.
-            linker: Some("rust-ptx-linker".into()),
+            linker: None,
+            requires_lto: true,
 
             // With `ptx-linker` approach, it can be later overridden via link flags.
             cpu: "sm_30".into(),
@@ -28,7 +28,7 @@ pub fn target() -> Target {
 
             // Avoid using dylib because it contain metadata not supported
             // by LLVM NVPTX backend.
-            only_cdylib: true,
+            // only_cdylib: true,
 
             // Let the `ptx-linker` to handle LLVM lowering into MC / assembly.
             obj_is_bitcode: true,
