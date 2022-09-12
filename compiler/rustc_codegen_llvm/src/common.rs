@@ -286,7 +286,7 @@ impl<'ll, 'tcx> ConstMethods<'tcx> for CodegenCx<'ll, 'tcx> {
                 let llval = unsafe {
                     llvm::LLVMConstInBoundsGEP2(
                         self.type_i8(),
-                        self.const_bitcast(base_addr, self.type_ptr_ext(base_addr_space)),
+                        self.const_ptrcast(base_addr, self.type_ptr_ext(base_addr_space)),
                         &self.const_usize(offset.bytes()),
                         1,
                     )
@@ -294,7 +294,7 @@ impl<'ll, 'tcx> ConstMethods<'tcx> for CodegenCx<'ll, 'tcx> {
                 if !matches!(layout.primitive(), Pointer(_)) {
                     unsafe { llvm::LLVMConstPtrToInt(llval, llty) }
                 } else {
-                    self.const_bitcast(llval, llty)
+                    self.const_ptrcast(llval, llty)
                 }
             }
         }

@@ -202,7 +202,31 @@ fn check_and_apply_linkage<'ll, 'tcx>(
 
 impl<'ll> CodegenCx<'ll, '_> {
     pub(crate) fn const_bitcast(&self, val: &'ll Value, ty: &'ll Type) -> &'ll Value {
+        // FIXME: remove before merge
+        assert!(
+            !(matches!(
+                self.type_kind(self.val_ty(val)),
+                rustc_codegen_ssa::common::TypeKind::Pointer
+            ) || matches!(self.type_kind(ty), rustc_codegen_ssa::common::TypeKind::Pointer)),
+            "val ty is {:?}, dest_ty is {:?}",
+            self.type_kind(self.val_ty(val)),
+            self.type_kind(ty),
+        );
         unsafe { llvm::LLVMConstBitCast(val, ty) }
+    }
+
+    pub(crate) fn const_ptrcast(&self, val: &'ll Value, ty: &'ll Type) -> &'ll Value {
+        // FIXME: remove before merge
+        assert!(
+            (matches!(
+                self.type_kind(self.val_ty(val)),
+                rustc_codegen_ssa::common::TypeKind::Pointer
+            ) && matches!(self.type_kind(ty), rustc_codegen_ssa::common::TypeKind::Pointer)),
+            "val ty is {:?}, dest_ty is {:?}",
+            self.type_kind(self.val_ty(val)),
+            self.type_kind(ty),
+        );
+        unsafe { llvm::LLVMConstPointerCast(val, ty) }
     }
 
     pub(crate) fn static_addr_of_mut(
