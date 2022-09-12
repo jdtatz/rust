@@ -339,7 +339,7 @@ impl<'ll, 'tcx> ConstCodegenMethods for CodegenCx<'ll, 'tcx> {
                 if !matches!(layout.primitive(), Pointer(_)) {
                     unsafe { llvm::LLVMConstPtrToInt(llval, llty) }
                 } else {
-                    self.const_bitcast(llval, llty)
+                    self.const_pointercast(llval, llty)
                 }
             }
         }
