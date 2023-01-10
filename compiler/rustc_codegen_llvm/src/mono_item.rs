@@ -24,13 +24,14 @@ impl<'tcx> PreDefineCodegenMethods<'tcx> for CodegenCx<'_, 'tcx> {
     ) {
         let instance = Instance::mono(self.tcx, def_id);
         let DefKind::Static { nested, .. } = self.tcx.def_kind(def_id) else { bug!() };
+        let attrs = self.tcx.codegen_fn_attrs(def_id);
         // Nested statics do not have a type, so pick a dummy type and let `codegen_static` figure
         // out the llvm type from the actual evaluated initializer.
         let ty =
             if nested { self.tcx.types.unit } else { instance.ty(self.tcx, self.typing_env()) };
         let llty = self.layout_of(ty).llvm_type(self);
 
-        let g = self.define_global(symbol_name, llty).unwrap_or_else(|| {
+        let g = self.define_global(symbol_name, llty, attrs.address_space).unwrap_or_else(|| {
             self.sess()
                 .dcx()
                 .emit_fatal(SymbolAlreadyDefined { span: self.tcx.def_span(def_id), symbol_name })

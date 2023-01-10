@@ -44,7 +44,8 @@ pub(crate) fn prepare_covfun_records_for_unused_functions<'tcx>(
     if !name_globals.is_empty() {
         let initializer = cx.const_array(cx.type_ptr(), &name_globals);
 
-        let array = llvm::add_global(cx.llmod, cx.val_ty(initializer), c"__llvm_coverage_names");
+        let array =
+            llvm::add_global(cx.llmod, cx.val_ty(initializer), c"__llvm_coverage_names", None);
         llvm::set_global_constant(array, true);
         llvm::set_linkage(array, llvm::Linkage::InternalLinkage);
         llvm::set_initializer(array, initializer);

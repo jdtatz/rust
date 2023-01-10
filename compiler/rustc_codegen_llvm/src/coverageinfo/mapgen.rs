@@ -224,7 +224,7 @@ fn generate_covmap_record<'ll>(cx: &mut CodegenCx<'ll, '_>, version: u32, filena
         .const_struct(&[covmap_header, cx.const_bytes(filenames_buffer)], /* packed */ false);
 
     let covmap_global =
-        llvm::add_global(cx.llmod, cx.val_ty(covmap_record), &llvm_cov::covmap_var_name());
+        llvm::add_global(cx.llmod, cx.val_ty(covmap_record), &llvm_cov::covmap_var_name(), None);
     llvm::set_initializer(covmap_global, covmap_record);
     llvm::set_global_constant(covmap_global, true);
     llvm::set_linkage(covmap_global, llvm::Linkage::PrivateLinkage);

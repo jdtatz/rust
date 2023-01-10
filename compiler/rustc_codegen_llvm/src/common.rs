@@ -212,7 +212,7 @@ impl<'ll, 'tcx> ConstCodegenMethods for CodegenCx<'ll, 'tcx> {
         let str_global = const_str_cache.get(s).copied().unwrap_or_else(|| {
             let sc = self.const_bytes(s.as_bytes());
             let sym = self.generate_local_symbol_name("str");
-            let g = self.define_global(&sym, self.val_ty(sc)).unwrap_or_else(|| {
+            let g = self.define_global(&sym, self.val_ty(sc), None).unwrap_or_else(|| {
                 bug!("symbol `{}` is already defined", sym);
             });
             llvm::set_initializer(g, sc);

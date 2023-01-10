@@ -1124,7 +1124,7 @@ unsafe fn embed_bitcode(
             // We don't need custom section flags, create LLVM globals.
             let llconst = common::bytes_in_context(llcx, bitcode);
             let llglobal =
-                llvm::add_global(llmod, common::val_ty(llconst), c"rustc.embedded.module");
+                llvm::add_global(llmod, common::val_ty(llconst), c"rustc.embedded.module", None);
             llvm::set_initializer(llglobal, llconst);
 
             llvm::set_section(llglobal, bitcode_section_name(cgcx));
@@ -1133,7 +1133,7 @@ unsafe fn embed_bitcode(
 
             let llconst = common::bytes_in_context(llcx, cmdline.as_bytes());
             let llglobal =
-                llvm::add_global(llmod, common::val_ty(llconst), c"rustc.embedded.cmdline");
+                llvm::add_global(llmod, common::val_ty(llconst), c"rustc.embedded.cmdline", None);
             llvm::set_initializer(llglobal, llconst);
             let section = if cgcx.target_is_like_darwin {
                 c"__LLVM,__cmdline"
@@ -1193,7 +1193,7 @@ fn create_msvc_imps(
         .collect::<Vec<_>>();
 
     for (imp_name, val) in globals {
-        let imp = llvm::add_global(llmod, ptr_ty, &imp_name);
+        let imp = llvm::add_global(llmod, ptr_ty, &imp_name, None);
 
         llvm::set_initializer(imp, val);
         llvm::set_linkage(imp, llvm::Linkage::ExternalLinkage);

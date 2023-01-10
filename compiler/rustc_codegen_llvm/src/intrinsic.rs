@@ -782,13 +782,14 @@ fn codegen_msvc_try<'ll, 'tcx>(
         //
         // When modifying, make sure that the type_name string exactly matches
         // the one used in library/panic_unwind/src/seh.rs.
-        let type_info_vtable = bx.declare_global("??_7type_info@@6B@", bx.type_ptr());
+        let type_info_vtable = bx.declare_global("??_7type_info@@6B@", bx.type_ptr(), None);
         let type_name = bx.const_bytes(b"rust_panic\0");
         let type_info =
             bx.const_struct(&[type_info_vtable, bx.const_null(bx.type_ptr()), type_name], false);
         let tydesc = bx.declare_global(
             &mangle_internal_symbol(bx.tcx, "__rust_panic_type_info"),
             bx.val_ty(type_info),
+            None,
         );
 
         llvm::set_linkage(tydesc, llvm::Linkage::LinkOnceODRLinkage);

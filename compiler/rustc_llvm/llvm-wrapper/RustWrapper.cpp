@@ -209,10 +209,28 @@ extern "C" LLVMValueRef LLVMRustGetOrInsertFunction(LLVMModuleRef M,
                   .getCallee());
 }
 
-extern "C" LLVMValueRef LLVMRustGetOrInsertGlobal(LLVMModuleRef M,
-                                                  const char *Name,
-                                                  size_t NameLen,
-                                                  LLVMTypeRef Ty) {
+#if LLVM_VERSION_LT(16, 0)
+static Optional<unsigned> wrap_opt_address_space(bool InAddressSpace,
+                                                 unsigned AddressSpace) {
+#else
+static std::optional<unsigned> wrap_opt_address_space(bool InAddressSpace,
+                                                      unsigned AddressSpace) {
+#endif
+  if (InAddressSpace) {
+    return AddressSpace;
+  } else {
+#if LLVM_VERSION_LT(16, 0)
+    return None;
+#else
+    return std::nullopt;
+#endif
+  }
+}
+
+extern "C" LLVMValueRef
+LLVMRustGetOrInsertGlobal(LLVMModuleRef M, const char *Name, size_t NameLen,
+                          LLVMTypeRef Ty, bool InAddressSpace,
+                          unsigned AddressSpace) {
   Module *Mod = unwrap(M);
   auto NameRef = StringRef(Name, NameLen);
 
@@ -222,15 +240,21 @@ extern "C" LLVMValueRef LLVMRustGetOrInsertGlobal(LLVMModuleRef M,
   // GlobalVariable* so we can access linkage, visibility, etc.
   GlobalVariable *GV = Mod->getGlobalVariable(NameRef, true);
   if (!GV)
-    GV = new GlobalVariable(*Mod, unwrap(Ty), false,
-                            GlobalValue::ExternalLinkage, nullptr, NameRef);
+    GV = new GlobalVariable(
+        *Mod, unwrap(Ty), false, GlobalValue::ExternalLinkage, nullptr, NameRef,
+        nullptr, GlobalValue::NotThreadLocal,
+        wrap_opt_address_space(InAddressSpace, AddressSpace));
   return wrap(GV);
 }
 
 extern "C" LLVMValueRef LLVMRustInsertPrivateGlobal(LLVMModuleRef M,
-                                                    LLVMTypeRef Ty) {
-  return wrap(new GlobalVariable(*unwrap(M), unwrap(Ty), false,
-                                 GlobalValue::PrivateLinkage, nullptr));
+                                                    LLVMTypeRef Ty,
+                                                    bool InAddressSpace,
+                                                    unsigned AddressSpace) {
+  return wrap(new GlobalVariable(
+      *unwrap(M), unwrap(Ty), false, GlobalValue::PrivateLinkage, nullptr, "",
+      nullptr, GlobalValue::NotThreadLocal,
+      wrap_opt_address_space(InAddressSpace, AddressSpace)));
 }
 
 // Must match the layout of `rustc_codegen_llvm::llvm::ffi::AttributeKind`.

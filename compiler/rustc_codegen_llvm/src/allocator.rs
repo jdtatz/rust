@@ -75,7 +75,7 @@ pub(crate) unsafe fn codegen(
     unsafe {
         // __rust_alloc_error_handler_should_panic
         let name = mangle_internal_symbol(tcx, OomStrategy::SYMBOL);
-        let ll_g = cx.declare_global(&name, i8);
+        let ll_g = cx.declare_global(&name, i8, None);
         llvm::set_visibility(ll_g, llvm::Visibility::from_generic(tcx.sess.default_visibility()));
         let val = tcx.sess.opts.unstable_opts.oom.should_panic();
         let llval = llvm::LLVMConstInt(i8, val as u64, False);

@@ -70,7 +70,7 @@ pub(crate) fn get_or_insert_gdb_debug_scripts_section_global<'ll>(
             let llvm_type = cx.type_array(cx.type_i8(), section_contents.len() as u64);
 
             let section_var = cx
-                .define_global(section_var_name, llvm_type)
+                .define_global(section_var_name, llvm_type, None)
                 .unwrap_or_else(|| bug!("symbol `{}` is already defined", section_var_name));
             llvm::set_section(section_var, c".debug_gdb_scripts");
             llvm::set_initializer(section_var, cx.const_bytes(section_contents));

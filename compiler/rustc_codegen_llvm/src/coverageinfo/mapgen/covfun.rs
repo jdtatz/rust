@@ -233,7 +233,8 @@ pub(crate) fn generate_covfun_record<'tcx>(
     let covfun_var_name = CString::new(format!("__covrec_{func_name_hash:X}{u}")).unwrap();
     debug!("function record var name: {covfun_var_name:?}");
 
-    let covfun_global = llvm::add_global(cx.llmod, cx.val_ty(covfun_record), &covfun_var_name);
+    let covfun_global =
+        llvm::add_global(cx.llmod, cx.val_ty(covfun_record), &covfun_var_name, None);
     llvm::set_initializer(covfun_global, covfun_record);
     llvm::set_global_constant(covfun_global, true);
     llvm::set_linkage(covfun_global, llvm::Linkage::LinkOnceODRLinkage);

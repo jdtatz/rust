@@ -645,7 +645,7 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
     pub(crate) fn create_used_variable_impl(&self, name: &'static CStr, values: &[&'ll Value]) {
         let array = self.const_array(self.type_ptr(), values);
 
-        let g = llvm::add_global(self.llmod, self.val_ty(array), name);
+        let g = llvm::add_global(self.llmod, self.val_ty(array), name, None);
         llvm::set_initializer(g, array);
         llvm::set_linkage(g, llvm::Linkage::AppendingLinkage);
         llvm::set_section(g, c"llvm.metadata");
@@ -887,7 +887,11 @@ impl<'ll> CodegenCx<'ll, '_> {
             Some(def_id) => self.get_static(def_id),
             _ => {
                 let ty = self.type_struct(&[self.type_ptr(), self.type_ptr()], false);
-                self.declare_global(&mangle_internal_symbol(self.tcx, "rust_eh_catch_typeinfo"), ty)
+                self.declare_global(
+                    &mangle_internal_symbol(self.tcx, "rust_eh_catch_typeinfo"),
+                    ty,
+                    None,
+                )
             }
         };
         self.eh_catch_typeinfo.set(Some(eh_catch_typeinfo));

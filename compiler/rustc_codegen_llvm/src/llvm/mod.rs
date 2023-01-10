@@ -249,8 +249,19 @@ pub(crate) fn set_section(llglobal: &Value, section_name: &CStr) {
     }
 }
 
-pub(crate) fn add_global<'a>(llmod: &'a Module, ty: &'a Type, name_cstr: &CStr) -> &'a Value {
-    unsafe { LLVMAddGlobal(llmod, ty, name_cstr.as_ptr()) }
+pub(crate) fn add_global<'a>(
+    llmod: &'a Module,
+    ty: &'a Type,
+    name_cstr: &CStr,
+    address_space: Option<u16>,
+) -> &'a Value {
+    if let Some(address_space) = address_space {
+        unsafe {
+            LLVMAddGlobalInAddressSpace(llmod, ty, name_cstr.as_ptr(), address_space as c_uint)
+        }
+    } else {
+        unsafe { LLVMAddGlobal(llmod, ty, name_cstr.as_ptr()) }
+    }
 }
 
 pub(crate) fn set_initializer(llglobal: &Value, constant_val: &Value) {
