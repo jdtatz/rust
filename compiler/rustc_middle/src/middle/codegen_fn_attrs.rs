@@ -54,6 +54,9 @@ pub struct CodegenFnAttrs {
     pub patchable_function_entry: Option<PatchableFunctionEntry>,
     /// For the `#[autodiff]` macros.
     pub autodiff_item: Option<AutoDiffAttrs>,
+    /// The `#[address_space = "..."]` attribute, indicating in which address space a
+    /// Rust-defined/foreign static value resides.
+    pub address_space: Option<u16>,
 }
 
 #[derive(Copy, Clone, Debug, TyEncodable, TyDecodable, HashStable)]
@@ -160,6 +163,7 @@ impl CodegenFnAttrs {
             alignment: None,
             patchable_function_entry: None,
             autodiff_item: None,
+            address_space: None,
         }
     }
 

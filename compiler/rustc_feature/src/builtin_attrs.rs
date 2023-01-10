@@ -549,6 +549,7 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         ErrorPreceding, EncodeCrossCrate::No,
         coverage_attribute, experimental!(coverage)
     ),
+    gated!(address_space, Normal, template!(List: "space"), ErrorPreceding, EncodeCrossCrate::No, experimental!(address_space)),
 
     ungated!(
         doc, Normal, template!(List: "hidden|inline|...", NameValueStr: "string"), DuplicatesOk,

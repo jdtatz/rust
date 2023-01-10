@@ -262,6 +262,11 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
                     codegen_fn_attrs.link_ordinal = ordinal;
                 }
             }
+            sym::address_space => {
+                if let address_space @ Some(_) = check_address_space(tcx, attr) {
+                    codegen_fn_attrs.address_space = address_space;
+                }
+            }
             sym::no_sanitize => {
                 no_sanitize_span = Some(attr.span());
                 if let Some(list) = attr.meta_item_list() {
@@ -626,6 +631,46 @@ fn check_link_name_xor_ordinal(
         tcx.dcx().span_err(span, msg);
     } else {
         tcx.dcx().err(msg);
+    }
+}
+
+fn check_address_space(tcx: TyCtxt<'_>, attr: &hir::Attribute) -> Option<u16> {
+    use rustc_ast::{LitIntType, LitKind, MetaItemLit};
+    let meta_item_list = attr.meta_item_list();
+    let meta_item_list = meta_item_list.as_deref();
+    let sole_meta_list = match meta_item_list {
+        Some([item]) => item.lit(),
+        Some(_) => {
+            let msg = "incorrect number of arguments to `#[address_space]`";
+            tcx.dcx()
+                .struct_span_err(attr.span, msg)
+                .with_note("the attribute requires exactly one argument")
+                .emit();
+            return None;
+        }
+        _ => None,
+    };
+    if let Some(MetaItemLit { kind: LitKind::Int(ordinal, LitIntType::Unsuffixed), .. }) =
+        sole_meta_list
+    {
+        if ordinal.get() <= u16::MAX as u128 {
+            Some(ordinal.get() as u16)
+        } else {
+            let msg =
+                format!("address space value in `address_space` is too large: `{}`", &ordinal);
+            tcx.dcx()
+                .struct_span_err(attr.span, msg)
+                .with_note("the value may not exceed `u16::MAX`")
+                .emit();
+            None
+        }
+    } else {
+        let msg = "illegal address space format in `address_space`";
+        tcx.dcx()
+            .struct_span_err(attr.span, msg)
+            .with_note("an unsuffixed integer value, e.g., `1`, is expected")
+            .emit();
+        None
     }
 }
 
