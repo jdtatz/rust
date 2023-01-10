@@ -322,6 +322,8 @@ declare_features! (
     (unstable, abi_riscv_interrupt, "1.73.0", Some(111889), None),
     /// Allows `extern "x86-interrupt" fn()`.
     (unstable, abi_x86_interrupt, "1.17.0", Some(40180), None),
+    /// Allows `#[address_space = "..."]` on static varibles.
+    (incomplete, address_space, "CURRENT_RUSTC_VERSION", Some(1), None),
     /// Allows additional const parameter types, such as `&'static str` or user defined types
     (incomplete, adt_const_params, "1.56.0", Some(95174), None),
     /// Allows defining an `#[alloc_error_handler]`.

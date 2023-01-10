@@ -360,6 +360,7 @@ symbols! {
         add_assign,
         add_with_overflow,
         address,
+        address_space,
         adt_const_params,
         advanced_slice_patterns,
         adx_target_feature,

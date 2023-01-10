@@ -396,6 +396,7 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         experimental!(no_sanitize)
     ),
     gated!(coverage, Normal, template!(Word, List: "on|off"), WarnFollowing, coverage_attribute, experimental!(coverage)),
+    gated!(address_space, Normal, template!(List: "space"), ErrorPreceding, experimental!(address_space)),
 
     ungated!(
         doc, Normal, template!(List: "hidden|inline|...", NameValueStr: "string"), DuplicatesOk

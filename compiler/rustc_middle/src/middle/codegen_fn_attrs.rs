@@ -43,6 +43,9 @@ pub struct CodegenFnAttrs {
     /// The `#[repr(align(...))]` attribute. Indicates the value of which the function should be
     /// aligned to.
     pub alignment: Option<u32>,
+    /// The `#[address_space = "..."]` attribute, indicating in which address space a
+    /// Rust-defined/foreign static value resides.
+    pub address_space: Option<u16>,
 }
 
 bitflags! {
@@ -123,6 +126,7 @@ impl CodegenFnAttrs {
             no_sanitize: SanitizerSet::empty(),
             instruction_set: None,
             alignment: None,
+            address_space: None,
         }
     }
 
