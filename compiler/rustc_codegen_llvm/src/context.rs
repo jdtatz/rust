@@ -942,7 +942,7 @@ impl<'ll> CodegenCx<'ll, '_> {
             Some(def_id) => self.get_static(def_id),
             _ => {
                 let ty = self.type_struct(&[self.type_ptr(), self.type_ptr()], false);
-                self.declare_global("rust_eh_catch_typeinfo", ty)
+                self.declare_global("rust_eh_catch_typeinfo", ty, None)
             }
         };
         self.eh_catch_typeinfo.set(Some(eh_catch_typeinfo));

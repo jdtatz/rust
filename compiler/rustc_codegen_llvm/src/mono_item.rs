@@ -24,7 +24,7 @@ impl<'tcx> PreDefineMethods<'tcx> for CodegenCx<'_, 'tcx> {
         let ty = instance.ty(self.tcx, ty::ParamEnv::reveal_all());
         let llty = self.layout_of(ty).llvm_type(self);
 
-        let g = self.define_global(symbol_name, llty).unwrap_or_else(|| {
+        let g = self.define_global(symbol_name, llty, None).unwrap_or_else(|| {
             self.sess()
                 .emit_fatal(SymbolAlreadyDefined { span: self.tcx.def_span(def_id), symbol_name })
         });

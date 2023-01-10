@@ -161,7 +161,7 @@ fn check_and_apply_linkage<'ll, 'tcx>(
 
         unsafe {
             // Declare a symbol `foo` with the desired linkage.
-            let g1 = cx.declare_global(sym, cx.type_i8());
+            let g1 = cx.declare_global(sym, cx.type_i8(), attrs.address_space);
             llvm::LLVMRustSetLinkage(g1, base::linkage_to_llvm(linkage));
 
             // Declare an internal global `extern_with_linkage_foo` which
@@ -172,7 +172,7 @@ fn check_and_apply_linkage<'ll, 'tcx>(
             // zero.
             let mut real_name = "_rust_extern_with_linkage_".to_string();
             real_name.push_str(sym);
-            let g2 = cx.define_global(&real_name, llty).unwrap_or_else(|| {
+            let g2 = cx.define_global(&real_name, llty, attrs.address_space).unwrap_or_else(|| {
                 cx.sess().emit_fatal(SymbolAlreadyDefined {
                     span: cx.tcx.def_span(def_id),
                     symbol_name: sym,
@@ -192,11 +192,12 @@ fn check_and_apply_linkage<'ll, 'tcx>(
                 true,
             ),
             llty,
+            attrs.address_space
         )
     } else {
         // Generate an external declaration.
         // FIXME(nagisa): investigate whether it can be changed into define_global
-        cx.declare_global(sym, llty)
+        cx.declare_global(sym, llty, attrs.address_space)
     }
 }
 
@@ -239,13 +240,14 @@ impl<'ll> CodegenCx<'ll, '_> {
             let gv = match kind {
                 Some(kind) if !self.tcx.sess.fewer_names() => {
                     let name = self.generate_local_symbol_name(kind);
-                    let gv = self.define_global(&name, self.val_ty(cv)).unwrap_or_else(|| {
-                        bug!("symbol `{}` is already defined", name);
-                    });
+                    let gv =
+                        self.define_global(&name, self.val_ty(cv), None).unwrap_or_else(|| {
+                            bug!("symbol `{}` is already defined", name);
+                        });
                     llvm::LLVMRustSetLinkage(gv, llvm::Linkage::PrivateLinkage);
                     gv
                 }
-                _ => self.define_private_global(self.val_ty(cv)),
+                _ => self.define_private_global(self.val_ty(cv), None),
             };
             llvm::LLVMSetInitializer(gv, cv);
             set_global_alignment(self, gv, align);
@@ -282,7 +284,7 @@ impl<'ll> CodegenCx<'ll, '_> {
                 }
             }
 
-            let g = self.declare_global(sym, llty);
+            let g = self.declare_global(sym, llty, fn_attrs.address_space);
 
             if !self.tcx.is_reachable_non_generic(def_id) {
                 unsafe {
@@ -427,6 +429,8 @@ impl<'ll> StaticMethods for CodegenCx<'ll, '_> {
                     name.as_ptr().cast(),
                     name.len(),
                     val_llty,
+                    attrs.address_space.is_some(),
+                    attrs.address_space.unwrap_or_default() as _,
                 );
 
                 llvm::LLVMRustSetLinkage(new_g, linkage);

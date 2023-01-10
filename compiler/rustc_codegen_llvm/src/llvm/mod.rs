@@ -200,9 +200,20 @@ pub fn set_section(llglobal: &Value, section_name: &str) {
     }
 }
 
-pub fn add_global<'a>(llmod: &'a Module, ty: &'a Type, name: &str) -> &'a Value {
+pub fn add_global<'a>(
+    llmod: &'a Module,
+    ty: &'a Type,
+    name: &str,
+    address_space: Option<u16>,
+) -> &'a Value {
     let name_cstr = CString::new(name).expect("unexpected CString error");
-    unsafe { LLVMAddGlobal(llmod, ty, name_cstr.as_ptr()) }
+    if let Some(address_space) = address_space {
+        unsafe {
+            LLVMAddGlobalInAddressSpace(llmod, ty, name_cstr.as_ptr(), address_space as c_uint)
+        }
+    } else {
+        unsafe { LLVMAddGlobal(llmod, ty, name_cstr.as_ptr()) }
+    }
 }
 
 pub fn set_initializer(llglobal: &Value, constant_val: &Value) {

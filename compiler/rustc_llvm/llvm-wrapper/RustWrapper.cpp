@@ -176,8 +176,27 @@ extern "C" LLVMValueRef LLVMRustGetOrInsertFunction(LLVMModuleRef M,
   );
 }
 
+
+#if LLVM_VERSION_LT(16, 0)
+static Optional<unsigned> wrap_opt_address_space(bool InAddressSpace, unsigned AddressSpace) {
+#else
+static std::optional<unsigned> wrap_opt_address_space(bool InAddressSpace, unsigned AddressSpace) {
+#endif
+  if (InAddressSpace) {
+    return AddressSpace;
+  } else {
+#if LLVM_VERSION_LT(16, 0)
+    return None;
+#else
+    return std::nullopt;
+#endif
+  }
+}
+
+
 extern "C" LLVMValueRef
-LLVMRustGetOrInsertGlobal(LLVMModuleRef M, const char *Name, size_t NameLen, LLVMTypeRef Ty) {
+LLVMRustGetOrInsertGlobal(LLVMModuleRef M, const char *Name, size_t NameLen, LLVMTypeRef Ty,
+                          bool InAddressSpace, unsigned AddressSpace) {
   Module *Mod = unwrap(M);
   StringRef NameRef(Name, NameLen);
 
@@ -187,18 +206,30 @@ LLVMRustGetOrInsertGlobal(LLVMModuleRef M, const char *Name, size_t NameLen, LLV
   // GlobalVariable* so we can access linkage, visibility, etc.
   GlobalVariable *GV = Mod->getGlobalVariable(NameRef, true);
   if (!GV)
-    GV = new GlobalVariable(*Mod, unwrap(Ty), false,
-                            GlobalValue::ExternalLinkage, nullptr, NameRef);
+    GV = new GlobalVariable(*Mod,
+                            unwrap(Ty),
+                            false,
+                            GlobalValue::ExternalLinkage,
+                            nullptr,
+                            NameRef,
+                            nullptr,
+                            GlobalValue::NotThreadLocal,
+                            wrap_opt_address_space(InAddressSpace, AddressSpace));
   return wrap(GV);
 }
 
 extern "C" LLVMValueRef
-LLVMRustInsertPrivateGlobal(LLVMModuleRef M, LLVMTypeRef Ty) {
+LLVMRustInsertPrivateGlobal(LLVMModuleRef M, LLVMTypeRef Ty,
+                            bool InAddressSpace, unsigned AddressSpace) {
   return wrap(new GlobalVariable(*unwrap(M),
                                  unwrap(Ty),
                                  false,
                                  GlobalValue::PrivateLinkage,
-                                 nullptr));
+                                 nullptr,
+                                 "",
+                                 nullptr,
+                                 GlobalValue::NotThreadLocal,
+                                 wrap_opt_address_space(InAddressSpace, AddressSpace)));
 }
 
 static Attribute::AttrKind fromRust(LLVMRustAttribute Kind) {

@@ -219,7 +219,7 @@ pub(crate) fn save_cov_data_to_mod<'ll, 'tcx>(
     .expect("Rust Coverage section name failed UTF-8 conversion");
     debug!("covmap section name: {:?}", covmap_section_name);
 
-    let llglobal = llvm::add_global(cx.llmod, cx.val_ty(cov_data_val), &covmap_var_name);
+    let llglobal = llvm::add_global(cx.llmod, cx.val_ty(cov_data_val), &covmap_var_name, None);
     llvm::set_initializer(llglobal, cov_data_val);
     llvm::set_global_constant(llglobal, true);
     llvm::set_linkage(llglobal, llvm::Linkage::PrivateLinkage);
@@ -248,7 +248,8 @@ pub(crate) fn save_func_record_to_mod<'ll, 'tcx>(
     debug!("function record var name: {:?}", func_record_var_name);
     debug!("function record section name: {:?}", covfun_section_name);
 
-    let llglobal = llvm::add_global(cx.llmod, cx.val_ty(func_record_val), &func_record_var_name);
+    let llglobal =
+        llvm::add_global(cx.llmod, cx.val_ty(func_record_val), &func_record_var_name, None);
     llvm::set_initializer(llglobal, func_record_val);
     llvm::set_global_constant(llglobal, true);
     llvm::set_linkage(llglobal, llvm::Linkage::LinkOnceODRLinkage);

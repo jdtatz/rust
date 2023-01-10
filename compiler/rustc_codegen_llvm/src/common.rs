@@ -197,7 +197,7 @@ impl<'ll, 'tcx> ConstMethods<'tcx> for CodegenCx<'ll, 'tcx> {
             .or_insert_with(|| {
                 let sc = self.const_bytes(s.as_bytes());
                 let sym = self.generate_local_symbol_name("str");
-                let g = self.define_global(&sym, self.val_ty(sc)).unwrap_or_else(|| {
+                let g = self.define_global(&sym, self.val_ty(sc), None).unwrap_or_else(|| {
                     bug!("symbol `{}` is already defined", sym);
                 });
                 unsafe {
