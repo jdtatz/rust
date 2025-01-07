@@ -722,6 +722,13 @@ pub(crate) struct LinkOrdinal {
 }
 
 #[derive(Diagnostic)]
+#[diag(passes_address_space)]
+pub(crate) struct AddressSpace {
+    #[primary_span]
+    pub attr_span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag(passes_confusables)]
 pub(crate) struct Confusables {
     #[primary_span]

@@ -288,6 +288,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         [sym::ffi_pure, ..] => self.check_ffi_pure(attr.span(), attrs, target),
                         [sym::ffi_const, ..] => self.check_ffi_const(attr.span(), target),
                         [sym::link_ordinal, ..] => self.check_link_ordinal(attr, span, target),
+                        [sym::address_space, ..] => self.check_address_space(attr, span, target),
                         [sym::link, ..] => self.check_link(hir_id, attr, span, target),
                         [sym::macro_use, ..] | [sym::macro_escape, ..] => {
                             self.check_macro_use(hir_id, attr, target)
@@ -2218,6 +2219,15 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             Target::ForeignFn | Target::ForeignStatic => {}
             _ => {
                 self.dcx().emit_err(errors::LinkOrdinal { attr_span: attr.span() });
+            }
+        }
+    }
+
+    fn check_address_space(&self, attr: &Attribute, _span: Span, target: Target) {
+        match target {
+            Target::Static | Target::ForeignStatic => {}
+            _ => {
+                self.dcx().emit_err(errors::AddressSpace { attr_span: attr.span() });
             }
         }
     }

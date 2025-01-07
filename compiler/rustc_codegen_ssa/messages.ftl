@@ -87,6 +87,15 @@ codegen_ssa_incorrect_cgu_reuse_type =
 
 codegen_ssa_insufficient_vs_code_product = VS Code is a different product, and is not sufficient.
 
+codegen_ssa_invalid_address_space_format = invalid address space value format in `address_space`
+    .note = an unsuffixed integer value, e.g., `1`, is expected
+
+codegen_ssa_invalid_address_space_nargs = incorrect number of arguments to `#[address_space]`
+    .note = the attribute requires exactly one argument
+
+codegen_ssa_invalid_address_space_value = address space value in `address_space` is too large: `{$value}`
+    .note = the value may not exceed `u16::MAX`
+
 codegen_ssa_invalid_instruction_set = invalid instruction set specified
 
 codegen_ssa_invalid_link_ordinal_nargs = incorrect number of arguments to `#[link_ordinal]`

@@ -13,6 +13,10 @@ passes_abi_ne =
 passes_abi_of =
     fn_abi_of({$fn_name}) = {$fn_abi}
 
+passes_address_space =
+    attribute should be applied to a static or foreign static
+    .label = not a static or foreign static
+
 passes_align_should_be_repr_align =
     `#[align(...)]` is not supported on {$item} items
     .suggestion = use `#[repr(align(...))]` instead

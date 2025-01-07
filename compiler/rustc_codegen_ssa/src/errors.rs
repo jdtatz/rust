@@ -1118,6 +1118,31 @@ pub(crate) struct InvalidLinkOrdinalFormat {
 }
 
 #[derive(Diagnostic)]
+#[diag(codegen_ssa_invalid_address_space_nargs)]
+#[note]
+pub(crate) struct InvalidAddressSpaceNargs {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(codegen_ssa_invalid_address_space_value)]
+#[note]
+pub(crate) struct InvalidAddressSpaceValue {
+    #[primary_span]
+    pub span: Span,
+    pub value: u128,
+}
+
+#[derive(Diagnostic)]
+#[diag(codegen_ssa_invalid_address_space_format)]
+#[note]
+pub(crate) struct InvalidAddressSpaceFormat {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag(codegen_ssa_target_feature_safe_trait)]
 pub(crate) struct TargetFeatureSafeTrait {
     #[primary_span]
