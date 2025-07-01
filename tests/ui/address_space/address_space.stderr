@@ -1,0 +1,53 @@
+warning: the feature `address_space` is incomplete and may not be safe to use and/or cause compiler crashes
+  --> $DIR/address_space.rs:1:12
+   |
+LL | #![feature(address_space)]
+   |            ^^^^^^^^^^^^^
+   |
+   = note: see issue #1 <https://github.com/rust-lang/rust/issues/1> for more information
+   = note: `#[warn(incomplete_features)]` on by default
+
+error: attribute should be applied to a static or foreign static
+  --> $DIR/address_space.rs:4:1
+   |
+LL | #[address_space(0)]
+   | ^^^^^^^^^^^^^^^^^^^
+
+error: attribute should be applied to a static or foreign static
+  --> $DIR/address_space.rs:27:1
+   |
+LL | #[address_space(0)]
+   | ^^^^^^^^^^^^^^^^^^^
+
+error: attribute should be applied to a static or foreign static
+  --> $DIR/address_space.rs:29:5
+   |
+LL |     #[address_space(0)]
+   |     ^^^^^^^^^^^^^^^^^^^
+
+error: incorrect number of arguments to `#[address_space]`
+  --> $DIR/address_space.rs:7:1
+   |
+LL | #[address_space(0, 1, 2)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: the attribute requires exactly one argument
+
+error: invalid address space value format in `address_space`
+  --> $DIR/address_space.rs:17:5
+   |
+LL |     #[address_space(fake_space)]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: an unsuffixed integer value, e.g., `1`, is expected
+
+error: address space value in `address_space` is too large: `65536`
+  --> $DIR/address_space.rs:24:1
+   |
+LL | #[address_space(65_536)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: the value may not exceed `u16::MAX`
+
+error: aborting due to 6 previous errors; 1 warning emitted
+
